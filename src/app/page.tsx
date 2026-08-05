@@ -1,354 +1,234 @@
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
 
-// サンプルデータ（後々ローカルストレージやDBから取得するように切り替える）
-const ANNOUNCEMENTS = [
-  { id: 1, date: '2026/07/03', title: '一般公開講演会『豊臣政権と後北条氏』7/12開催のお知らせ', category: 'ご案内', isImportant: false, url: 'https://www.hachimangu.or.jp/activity/news/1440' },
-  { id: 2, date: '2026/03/04', title: '令和９年度 奉職職員募集', category: 'ご案内', isImportant: false, url: 'https://www.hachimangu.or.jp/activity/news/1375' },
-  { id: 3, date: '2026/01/11', title: '巴会（茶会）の前売り券販売について', category: '催し', isImportant: false, url: 'https://www.hachimangu.or.jp/activity/news/1353' },
+// サイドメニューのデータ定義
+const SIDE_MENU = [
+  { id: '祈祷', label: '祈祷', icon: '⛩️', href: '/kitou', active: false },
+  { id: '初穂', label: '初穂', icon: '🌾', href: '/hatsuho', active: false },
+  { id: '授与品', label: '授与品', icon: '🏷️', href: '/juyohin', active: false },
+  { id: '授印', label: '授印', icon: '🖊️', href: '/juin', active: false },
+  { id: '賽銭', label: '賽銭', icon: '🪙', href: '/saisen', active: false },
+  { id: '御籤', label: '御籤', icon: '📜', href: '/mikuji', active: false },
+  { id: '宝物殿', label: '宝物殿', icon: '🏛️', href: '/houmotsuden', active: false },
+  { id: '参拝施設所', label: '参拝施設所', icon: '☕', href: '/sanpai', active: false },
+  { id: '欄外', label: '欄外', icon: '📄', href: '/rangai', active: false },
+  { id: '預り金入力', label: '預り金入力', icon: '💵', href: '/azukarikin', active: false },
 ];
 
-const INTERNAL_APPS = [
+// テーブルの表示データ
+const SUMMARY_ITEMS = [
   {
-    id: 1,
-    name: '祈祷受付',
-    description: '',
-    color: {
-      border: "border-emerald-200",
-      headerBg: "bg-emerald-50",
-      headerText: "text-emerald-700",
-    },
-    groups: [
-      {
-        title: "新規入力",
-        links: [
-          { name: "法人", url: "#" },
-          { name: "個人", url: "#" },
-          { name: "安産", url: "#" },
-          { name: "初宮・七五三", url: "#" },
-        ]
-      },
-      {
-        title: "検索",
-        links: [
-          { name: "検索(受付前)", url: "#" },
-          { name: "記念品", url: "#" },
-          { name: "予約表", url: "#" },
-          { name: "検索(受付後)", url: "#" },
-          { name: "汎用検索", url: "#" },
-          { name: "登録一覧", url: "#" },
-        ]
-      },
-      {
-        title: "実績管理",
-        links: [
-          { name: "日計表", url: "#" },
-          { name: "受付票一覧", url: "#" },
-          { name: "祈祷料受納実績", url: "#" },
-          { name: "新年予約祈祷受付登録", url: "#" },
-          { name: "新年予約祈祷実績一覧", url: "#" },
-        ]
-      },
-      {
-        title: "予約祈祷",
-        links: [
-          { name: "新年祈祷申込用紙作成", url: "#" },
-          { name: "法人祈祷履歴", url: "#" },
-          { name: "新年祈祷受付一覧", url: "#" },
-          { name: "新年申込用紙QRスキャン", url: "#" },
-          { name: "庚申祭予約一覧", url: "#" },
-          { name: "本殿・出向祭祈祷一覧", url: "#" },
-        ]
-      },
-      {
-        title: "七五三プラン",
-        links: [
-          { name: "プラン新規入力", url: "#" },
-          { name: "七五三プラン一覧", url: "#" },
-        ]
-      }
-    ]
+    title: '祈祷料',
+    rows: [
+      { label: '数量', value: '23' },
+      { label: '金額', value: '123,456 円' },
+    ],
   },
   {
-    id: 2,
-    name: '授与品管理',
-    description: '',
-    color: {
-      border: "border-sky-200",
-      headerBg: "bg-sky-50",
-      headerText: "text-sky-700",
-    },
-    groups: [
-      {
-        links: [
-          { name: "授与実績（一覧/登録）", url: "" },
-          { name: "返品実績（一覧/登録）", url: "" },
-          { name: "入出庫実績（一覧/登録）", url: "" },
-          { name: "残取実績（登録）", url: "" },
-          { name: "残取実績（一覧）", url: "" },
-          { name: "ＣＳＶ出力", url: "" },
-        ]
-      },
-    ]
+    title: '初穂料',
+    rows: [
+      { label: '数量', value: '4' },
+      { label: '金額', value: '123,456 円' },
+    ],
   },
   {
-    id: 3,
-    name: '発注管理',
-    description: '',
-    color: {
-      border: "border-blue-300",
-      headerBg: "bg-blue-50",
-      headerText: "text-blue-800",
-    },
-    groups: [
-      {
-        links: [
-          { name: "発注登録", url: "" },
-          { name: "未納一覧（納品登録）", url: "" },
-          { name: "発注履歴", url: "" },
-          { name: "在庫状況（発注一括登録）", url: "" },
-          { name: "納品一括登録", url: "" },
-        ]
-      },
-    ]
+    title: '授与品',
+    rows: [
+      { label: '金額(神符守札)', value: '123,456 円' },
+      { label: '金額(社頭絵図)', value: '123,456 円' },
+    ],
   },
   {
-    id: 4,
-    name: '勤怠／礼典介助',
-    description: '',
-    color: {
-      border: "border-amber-200",
-      headerBg: "bg-amber-50",
-      headerText: "text-amber-700",
-    },
-    groups: [
-      {
-        links: [
-          { name: "勤務予定一覧", url: "" },
-          { name: "勤務実績一覧", url: "" },
-          { name: "礼典介助一覧", url: "" },
-          { name: "申請書類一覧", url: "" },
-          { name: "回覧書類一覧", url: "" },
-          { name: "礼典介助検索", url: "" },
-        ]
-      },
-    ]
+    title: '授印料',
+    rows: [
+      { label: '数量', value: '98' },
+      { label: '金額', value: '123,456 円' },
+    ],
   },
   {
-    id: 5,
-    name: '氏子崇敬者',
-    description: '',
-    color: {
-      border: "border-red-200",
-      headerBg: "bg-red-50",
-      headerText: "text-red-700",
-    },
-    groups: [
-      {
-        links: [
-          { name: "崇敬者台帳", url: "" },
-          { name: "崇敬者登録", url: "" },
-          { name: "崇敬者台帳(新環境テスト)", url: "" },
-        ]
-      },
-    ]
+    title: '賽銭',
+    rows: [{ label: '', value: '123,456 円' }],
   },
   {
-    id: 6,
-    name: 'マスタメンテナンス',
-    description: '',
-    color: {
-      border: "border-slate-200",
-      headerBg: "bg-slate-50",
-      headerText: "text-slate-700",
-    },
-    groups: [
-      {
-        title: "全体",
-        links: [
-          { name: "ユーザマスタ", url: "" },
-          { name: "暦マスタ", url: "" },
-          { name: "予約不可日程マスタ", url: "" },
-          { name: "予約枠設定（一括）", url: "" },
-          { name: "予約枠設定（日単位）", url: "" },
-        ]
-      },
-      {
-        title: "祈祷受付",
-        links: [
-          { name: "プリンタマスタ", url: "" },
-          { name: "レポートプリンタ", url: "" },
-        ]
-      },
-      {
-        title: "メール",
-        links: [
-          { name: "テンプレート管理", url: "" },
-        ]
-      },
-      {
-        title: "授与品管理",
-        links: [
-          { name: "授与品マスタ", url: "" },
-          { name: "保管場所マスタ", url: "" },
-          { name: "メーカーマスタ", url: "" },
-        ]
-      }
-    ]
+    title: '御籤',
+    rows: [{ label: '', value: '123,456 円' }],
+  },
+  {
+    title: '拝観料',
+    rows: [{ label: '', value: '123,456 円' }],
+  },
+  {
+    title: '参拝施設所',
+    rows: [{ label: '', value: '123,456 円' }],
+  },
+  {
+    title: '欄外',
+    rows: [{ label: '', value: '123,456 円' }],
   },
 ];
 
-export default function PortalPage() {
-  const dayOfWeekStr = ['日', '月', '火', '水', '木', '金', '土'];
-  const today = new Date();
-  const formattedDate = [
-    today.getFullYear(), '年',
-    (today.getMonth() + 1), '月',
-    today.getDate(), '日',
-    ' (', dayOfWeekStr[today.getDay()], ')'
-  ].join('');
+export default function DepositLedgerPage() {
+  const [date, setDate] = useState('2026/07/30');
+  const [placeCode, setPlaceCode] = useState('010-010');
 
   return (
-    <div className="min-h-screen bg-gray-50 grid grid-cols-1 md:grid-cols-10">
+    <div className="flex h-screen bg-[#FDFBF7] font-serif text-gray-800 overflow-hidden">
 
-      {/* 【 比率 2 】 1. サイドナビゲーション */}
-      <aside className="bg-slate-800 text-white p-6 md:col-span-2 flex flex-col justify-between min-h-screen md:min-h-0">
-        <div>
-          <div className="text-xl font-bold tracking-wider mb-8 text-cyan-400">鶴岡八幡宮 社務システム</div>
-          <nav className="space-y-2">
-            <a href="#" className="block py-2 px-4 rounded bg-slate-700 text-white font-medium">ホーム</a>
-            <a href="#" className="block py-2 px-4 rounded text-slate-300 hover:bg-slate-700 hover:text-white transition">パスワード変更</a>
-          </nav>
+      {/* 1. 左側サイドバー（画面左に固定） */}
+      <aside className="w-64 h-screen bg-[#008C9E] text-white flex flex-col shrink-0 shadow-lg sticky top-0">
+        {/* ロゴ・システム名 */}
+        <div className="p-4 flex items-center gap-3 border-b border-[#007b8b] shrink-0">
+          <div className="w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center font-bold text-[#008C9E] text-xl shadow shrink-0">
+            ⛩️
+          </div>
+          <Link href="/">
+            <div className="font-bold text-lg leading-tight tracking-wider">
+              社入金管理<br />システム
+            </div>
+          </Link>
         </div>
-        <div className="text-lg text-slate-400 border-t border-slate-700 pt-4 mt-8 md:mt-0">
-          ログイン: 管理者
-        </div>
+
+        {/* ナビゲーションメニュー */}
+        <nav className="flex-1 py-4 space-y-1 overflow-y-auto">
+          {SIDE_MENU.map((item) => (
+            <Link
+              key={item.id}
+              href={item.href}
+              className={`flex items-center gap-3 px-6 py-3 text-base transition-colors ${
+                item.active
+                  ? 'bg-[#55B3C1] font-bold text-white shadow-inner'
+                  : 'hover:bg-[#007b8b] text-teal-50'
+              }`}
+            >
+              <span className="text-xl">{item.icon}</span>
+              <span>{item.label}</span>
+            </Link>
+          ))}
+        </nav>
       </aside>
 
-      {/* 【 残りの比率 8 】 2. メインコンテンツエリア */}
-      <main className="p-6 md:p-10 overflow-y-auto md:col-span-8">
+      {/* 2. メインコンテンツエリア */}
+      <div className="flex-1 flex flex-col h-screen min-w-0">
 
-        {/* ヘッダーセクション（メインエリアの上部いっぱいに配置） */}
-        <header className="mb-8 flex justify-between items-center bg-white p-6 rounded-xl shadow-xs">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">おはようございます、管理者さん</h1>
+        {/* 固定ヘッダー（タイトル ＋ 検索・条件指定エリア） */}
+        <header className="bg-gray-200/90 backdrop-blur-sm border-b border-gray-300 shrink-0 sticky top-0 z-10 p-6 2xl:p-8 space-y-4 shadow-sm">
+          {/* 上段：タイトル＆ユーザー名 */}
+          <div className="flex justify-between items-center">
+            <h1 className="text-xl font-bold tracking-wider text-slate-800">社入金台帳</h1>
+            <div className="text-base font-medium text-slate-700">管理者</div>
           </div>
-          <div className="text-right text-lg text-slate-500">
-            <div>2026年7月13日 (月)</div>
+
+          {/* 下段：検索・条件指定ボックス */}
+          <div className="bg-[#FFEAD0] p-4 2xl:p-5 rounded-xl shadow-md border border-[#FCD29F] flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-6">
+              {/* 日付入力 */}
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-sm 2xl:text-base text-gray-700">日付</span>
+                <input
+                  type="text"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="bg-white border border-gray-400 rounded px-3 py-1 text-center w-36 shadow-inner font-sans tracking-wide focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              </div>
+
+              {/* 場所コード選択 */}
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-sm 2xl:text-base text-gray-700">場所コード</span>
+                <div className="relative">
+                  <select
+                    value={placeCode}
+                    onChange={(e) => setPlaceCode(e.target.value)}
+                    className="bg-white border border-gray-400 rounded px-3 py-1 pr-8 appearance-none shadow-inner font-sans focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  >
+                    <option value="010-010">010 - 010</option>
+                  </select>
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs pointer-events-none text-gray-600">▼</span>
+                </div>
+                <input
+                  type="text"
+                  readOnly
+                  value="祈祷所"
+                  className="bg-gray-200 border border-gray-400 rounded px-3 py-1 w-48 text-gray-700 shadow-inner"
+                />
+              </div>
+            </div>
+
+            {/* 検索ボタン */}
+            <button className="bg-[#004EA2] hover:bg-[#003B7B] text-white px-10 py-2 rounded-md font-bold shadow transition active:translate-y-0.5">
+              検索
+            </button>
           </div>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-8 gap-8">
+        {/* メインコンテンツ（テーブルとアクションボタンのみスクロール） */}
+        <main className="flex-1 p-6 2xl:p-8 flex flex-col justify-between overflow-y-auto">
+          <div className="w-full">
+            {/* 集計テーブル */}
+            <div className="bg-white border border-gray-400 shadow-sm rounded-sm">
+              <table className="w-full border-collapse text-left text-sm 2xl:text-base">
+                <tbody>
+                  {SUMMARY_ITEMS.map((item, itemIdx) => (
+                    <React.Fragment key={itemIdx}>
+                      {item.rows.map((row, rowIdx) => (
+                        <tr key={rowIdx} className="border-b border-gray-300 hover:bg-slate-50">
+                          {/* 項目名 */}
+                          {rowIdx === 0 && (
+                            <td
+                              rowSpan={item.rows.length}
+                              className="w-[25%] border-r border-gray-300 bg-gray-100/50 p-3.5 2xl:p-4 font-bold align-middle text-gray-800"
+                            >
+                              <div className="flex items-center gap-2">
+                                <span>{item.title}</span>
+                                <span className="text-xs text-gray-500 hover:text-blue-600 cursor-pointer">🔗</span>
+                              </div>
+                            </td>
+                          )}
 
-          {/* 【 比率 5 】 クイックリンク（業務アプリ一覧） */}
-          <section className="bg-white p-6 rounded-xl shadow-xs md:col-span-5">
-            <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-              <span>社務一覧</span>
-            </h2>
+                          {/* サブ項目（数量/金額など） */}
+                          {row.label ? (
+                            <td className="w-[20%] border-r border-gray-300 p-3 2xl:p-3.5 text-center bg-gray-50/30 text-gray-700">
+                              {row.label}
+                            </td>
+                          ) : null}
 
-            <div className="space-y-6">
-              {INTERNAL_APPS.map((app, index) => (
-                <div
-                  key={app.id || index}
-                  className={`flex flex-col rounded-lg border bg-white text-left overflow-hidden ${app.color?.border || 'border-gray-200'}`}
-                >
-                  <div className={`px-4 py-2 font-bold text-lg ${app.color?.headerBg || 'bg-gray-50'} ${app.color?.headerText || 'text-gray-700'}`}>
-                    {app.name}
-                  </div>
+                          {/* 値 */}
+                          <td
+                            colSpan={row.label ? 1 : 2}
+                            className="p-3 2xl:p-3.5 text-right font-sans font-normal tabular-nums text-gray-900 pr-12 text-base 2xl:text-lg"
+                          >
+                            {row.value}
+                          </td>
+                        </tr>
+                      ))}
+                    </React.Fragment>
+                  ))}
 
-                  <div className="p-4 flex-1 space-y-4 bg-white">
-                    {app.groups?.map((group, groupIndex) => {
-                      const hasTitle = 'title' in group && group.title;
-
-                      if (!hasTitle) {
-                        return (
-                          <ul key={groupIndex} className="p-1 space-y-2 text-lg">
-                            {group.links?.map((link, linkIndex) => (
-                              <li key={linkIndex} className="flex items-center gap-1">
-                                <span className="text-gray-400">・</span>
-                                <Link
-                                  href={link.url}
-                                  className="text-blue-600 hover:text-blue-800 hover:underline transition"
-                                >
-                                  {link.name}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        );
-                      }
-
-                      return (
-                        <div
-                          key={groupIndex}
-                          className="border border-gray-200 rounded-md overflow-hidden bg-white shadow-2xs"
-                        >
-                          <div className="bg-gray-50 border-b border-gray-200 px-3 py-2 text-base font-bold text-gray-700">
-                            {('title' in group) ? group.title : ''}
-                          </div>
-
-                          <ul className="p-3 space-y-2 text-lg">
-                            {group.links?.map((link, linkIndex) => (
-                              <li key={linkIndex} className="flex items-center gap-1">
-                                <span className="text-gray-400">・</span>
-                                <Link
-                                  href={link.url}
-                                  className="text-blue-600 hover:text-blue-800 hover:underline transition"
-                                >
-                                  {link.name}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
+                  {/* 合計金額行（非固定） */}
+                  <tr className="bg-[#F8D0FF] font-bold border-t-2 border-gray-400">
+                    <td colSpan={2} className="p-4 text-center border-r border-gray-400 text-gray-900">
+                      合計金額
+                    </td>
+                    <td className="p-4 text-right pr-12 font-sans tabular-nums text-gray-900 text-lg 2xl:text-xl">
+                      123,456,789 円
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-          </section>
+          </div>
 
-          {/* 【 比率 3 】 お知らせ一覧 */}
-          <section className="bg-white p-6 rounded-xl shadow-xs md:col-span-3">
-            <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-              <span>お知らせ</span>
-            </h2>
-            <div className="divide-y divide-gray-100">
-              {ANNOUNCEMENTS.map((item) => (
-                <div key={item.id} className="py-4 first:pt-0 last:pb-0 flex flex-col justify-between gap-2">
+          {/* 3. 右下アクションボタン */}
+          <div className="flex justify-end mt-6">
+            <button className="bg-[#997A00] hover:bg-[#806600] text-white px-10 py-3 rounded-full font-bold shadow-md transition active:translate-y-0.5 text-base">
+              帳票出力
+            </button>
+          </div>
+        </main>
+      </div>
 
-                  {/* 上段：カテゴリー と タイトル */}
-                  <div className="flex items-start gap-3">
-                    <span className={`text-lg px-2 py-1 rounded-sm font-medium shrink-0 mt-0.5 ${item.isImportant ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-gray-100 text-gray-600'
-                      }`}>
-                      {item.category}
-                    </span>
-                    {item.url ? (
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`text-slate-700 hover:text-cyan-600 hover:underline cursor-pointer text-base md:text-lg ${item.isImportant ? 'font-semibold' : ''}`}
-                      >
-                        {item.title}
-                      </a>
-                    ) : (
-                      <p className={`text-slate-700 text-base md:text-lg ${item.isImportant ? 'font-semibold' : ''}`}>
-                        {item.title}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="pl-16">
-                    <span className="text-sm md:text-base text-slate-400 block">{item.date}</span>
-                  </div>
-
-                </div>
-              ))}
-            </div>
-          </section>
-        </div>
-      </main>
     </div>
   );
 }

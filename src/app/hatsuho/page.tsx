@@ -2,20 +2,24 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { DatePickerInput } from '../../components/DatePickerInput';
+import { DEFAULT_DATE } from '../../constants/date';
 
+// サイドメニュー
 const SIDE_MENU = [
-  { id: '祈祷', label: '祈祷', icon: '⛩️', href: '#', active: false },
-  { id: '初穂', label: '初穂', icon: '🌾', href: '#', active: true },
-  { id: '授与品', label: '授与品', icon: '🏷️', href: '#', active: false },
-  { id: '授印', label: '授印', icon: '🖊️', href: '#', active: false },
-  { id: '賽銭', label: '賽銭', icon: '🪙', href: '#', active: false },
-  { id: '御籤', label: '御籤', icon: '📜', href: '#', active: false },
-  { id: '宝物殿', label: '宝物殿', icon: '🏛️', href: '#', active: false },
-  { id: '参拝施設所', label: '参拝施設所', icon: '☕', href: '#', active: false },
-  { id: '欄外', label: '欄外', icon: '📄', href: '#', active: false },
-  { id: '預り金入力', label: '預り金入力', icon: '💵', href: '#', active: false },
+  { id: '祈祷', label: '祈祷', icon: '⛩️', href: '/kitou', active: false },
+  { id: '初穂', label: '初穂', icon: '🌾', href: '/hatsuho', active: true },
+  { id: '授与品', label: '授与品', icon: '🏷️', href: '/juyohin', active: false },
+  { id: '授印', label: '授印', icon: '🖊️', href: '/juin', active: false },
+  { id: '賽銭', label: '賽銭', icon: '🪙', href: '/saisen', active: false },
+  { id: '御籤', label: '御籤', icon: '📜', href: '/mikuji', active: false },
+  { id: '宝物殿', label: '宝物殿', icon: '🏛️', href: '/houmotsuden', active: false },
+  { id: '参拝施設所', label: '参拝施設所', icon: '☕', href: '/sanpai', active: false },
+  { id: '欄外', label: '欄外', icon: '📄', href: '/rangai', active: false },
+  { id: '預り金入力', label: '預り金入力', icon: '💵', href: '/azukarikin', active: false },
 ];
 
+// テストデータ（DB疎通時に削除）
 const INITIAL_DATA = [
   { date: '2026/07/30', number: '1', amount: '123,456 円', type: '初穂', donator: '株式会社〇〇' },
   { date: '2026/07/30', number: '4', amount: '123,456 円', type: '絵馬', donator: '田中 太郎' },
@@ -23,7 +27,7 @@ const INITIAL_DATA = [
 ];
 
 export default function HatsuhoPage() {
-  const [inputDate, setInputDate] = useState('2026/07/30');
+  const [date, setDate] = useState(DEFAULT_DATE);
   const [number, setNumber] = useState('78');
   const [amount, setAmount] = useState('234,567');
   const [hatsuhoType, setHatsuhoType] = useState('家商祈願');
@@ -33,7 +37,7 @@ export default function HatsuhoPage() {
   const handleAdd = () => {
     if (!number) return;
     const newEntry = {
-      date: inputDate,
+      date: date,
       number,
       amount: amount ? `${amount} 円` : '',
       type: hatsuhoType,
@@ -43,7 +47,7 @@ export default function HatsuhoPage() {
   };
 
   return (
-    <div className="flex h-screen bg-[#FDFBF7] font-serif text-gray-800 overflow-hidden">
+    <div className="flex h-screen bg-[#FDFBF7] font-sans text-gray-800 overflow-hidden">
       {/* サイドバー */}
       <aside className="w-64 h-screen bg-[#008C9E] text-white flex flex-col shrink-0 shadow-lg sticky top-0">
         <div className="p-4 flex items-center gap-3 border-b border-[#007b8b] shrink-0">
@@ -61,9 +65,8 @@ export default function HatsuhoPage() {
             <Link
               key={item.id}
               href={item.href}
-              className={`flex items-center gap-3 px-6 py-3 text-base transition-colors ${
-                item.active ? 'bg-[#55B3C1] font-bold text-white shadow-inner' : 'hover:bg-[#007b8b] text-teal-50'
-              }`}
+              className={`flex items-center gap-3 px-6 py-3 text-base transition-colors ${item.active ? 'bg-[#55B3C1] font-bold text-white shadow-inner' : 'hover:bg-[#007b8b] text-teal-50'
+                }`}
             >
               <span className="text-xl">{item.icon}</span>
               <span>{item.label}</span>
@@ -81,17 +84,17 @@ export default function HatsuhoPage() {
           </div>
 
           {/* 入力エリア */}
-          <div className="bg-[#FFEAD0] p-4 2xl:p-5 rounded-xl shadow-md border border-[#FCD29F] flex flex-wrap items-center justify-between gap-4 text-sm 2xl:text-base">
+          <div className="bg-[#FFEAD0] p-4 2xl:p-5 rounded-xl shadow-md border border-[#FCD29F] flex flex-col gap-4 text-sm 2xl:text-base">
+
+            {/* 入力項目グループ（折り返し対応） */}
             <div className="flex flex-wrap items-center gap-y-3 gap-x-6">
+              {/* 日付入力 */}
               <div className="flex items-center gap-2">
-                <span className="font-bold text-gray-700">日付</span>
-                <input
-                  type="text"
-                  value={inputDate}
-                  onChange={(e) => setInputDate(e.target.value)}
-                  className="bg-white border border-gray-400 rounded px-3 py-1 text-center w-36 shadow-inner font-sans"
-                />
+                <span className="font-bold text-sm 2xl:text-base text-gray-700">日付</span>
+                <DatePickerInput value={date} onChange={setDate} />
               </div>
+
+              {/* 番号 */}
               <div className="flex items-center gap-2">
                 <span className="font-bold text-gray-700">番号</span>
                 <input
@@ -101,6 +104,8 @@ export default function HatsuhoPage() {
                   className="bg-white border border-gray-400 rounded px-3 py-1 text-center w-20 shadow-inner font-sans"
                 />
               </div>
+
+              {/* 金額 */}
               <div className="flex items-center gap-2">
                 <span className="font-bold text-gray-700">金額</span>
                 <input
@@ -110,13 +115,15 @@ export default function HatsuhoPage() {
                   className="bg-white border border-gray-400 rounded px-3 py-1 text-right w-40 shadow-inner font-sans"
                 />
               </div>
+
+              {/* 初穂種別 */}
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <span className="font-bold text-gray-700">初穂種別</span>
                 <div className="relative">
                   <select
                     value={hatsuhoType}
                     onChange={(e) => setHatsuhoType(e.target.value)}
-                    className="bg-white border border-gray-400 rounded px-4 py-1 pr-8 appearance-none shadow-inner font-serif"
+                    className="bg-white border border-gray-400 rounded px-4 py-1 pr-8 appearance-none shadow-inner font-sans"
                   >
                     <option value="家商祈願">家商祈願</option>
                     <option value="初穂">初穂</option>
@@ -126,23 +133,25 @@ export default function HatsuhoPage() {
                   <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs pointer-events-none text-gray-600">▼</span>
                 </div>
               </div>
+
+              {/* 奉納者 */}
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <span className="font-bold text-gray-700">奉納者</span>
                 <input
                   type="text"
                   value={donator}
                   onChange={(e) => setDonator(e.target.value)}
-                  className="bg-white border border-gray-400 rounded px-3 py-1 w-64 shadow-inner font-serif"
+                  className="bg-white border border-gray-400 rounded px-3 py-1 w-64 shadow-inner font-sans"
                 />
               </div>
             </div>
 
-            <button
-              onClick={handleAdd}
-              className="bg-[#0F7B42] hover:bg-[#0B5E32] text-white px-10 py-2 rounded-md font-bold shadow transition active:translate-y-0.5"
-            >
-              追加
-            </button>
+            {/* 追加ボタン（常に一番下の右端に固定） */}
+            <div className="flex justify-end pt-2 sm:pt-0">
+              <button onClick={handleAdd} className="bg-[#0F7B42] hover:bg-[#0B5E32] text-white h-10 px-8 inline-flex items-center justify-center text-sm font-bold rounded-md shadow transition active:translate-y-0.5 shrink-0 border-0 leading-none">
+                追加
+              </button>
+            </div>
           </div>
         </header>
 
@@ -164,8 +173,8 @@ export default function HatsuhoPage() {
                     <td className="p-3 text-center border-r border-gray-300 font-sans tabular-nums">{row.date}</td>
                     <td className="p-3 text-center border-r border-gray-300 font-sans tabular-nums">{row.number}</td>
                     <td className="p-3 text-right border-r border-gray-300 font-sans tabular-nums pr-8">{row.amount}</td>
-                    <td className="p-3 text-center border-r border-gray-300 font-serif">{row.type}</td>
-                    <td className="p-3 text-left pl-8 font-serif">{row.donator}</td>
+                    <td className="p-3 text-center border-r border-gray-300 font-sans">{row.type}</td>
+                    <td className="p-3 text-left pl-8 font-sans">{row.donator}</td>
                   </tr>
                 ))}
               </tbody>
@@ -173,8 +182,8 @@ export default function HatsuhoPage() {
           </div>
 
           <div className="flex justify-end items-center gap-4 mt-6">
-            <button className="bg-[#FF4D4D] hover:bg-[#E63939] text-white px-10 py-3 rounded-full font-bold shadow-md transition">保存</button>
-            <button className="bg-[#997A00] hover:bg-[#806600] text-white px-10 py-3 rounded-full font-bold shadow-md transition">帳票出力</button>
+            <button className="bg-[#FF4D4D] hover:bg-[#E63939] text-white px-10 py-2 rounded-md font-bold shadow transition active:translate-y-0.5 w-full sm:w-auto">保存</button>
+            <button className="bg-[#997A00] hover:bg-[#806600] text-white px-10 py-2 rounded-md font-bold shadow transition active:translate-y-0.5 w-full sm:w-auto">帳票出力</button>
           </div>
         </main>
       </div>

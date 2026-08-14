@@ -2,6 +2,9 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { PlaceCodeSelector } from '../components/PlaceCodeSelector';
+import { DatePickerInput } from '../components/DatePickerInput';
+import { DEFAULT_DATE } from '../constants/date';
 
 // サイドメニューのデータ定義
 const SIDE_MENU = [
@@ -21,6 +24,7 @@ const SIDE_MENU = [
 const SUMMARY_ITEMS = [
   {
     title: '祈祷料',
+    href: '/kitou',
     rows: [
       { label: '数量', value: '23' },
       { label: '金額', value: '123,456 円' },
@@ -28,6 +32,7 @@ const SUMMARY_ITEMS = [
   },
   {
     title: '初穂料',
+    href: '/hatsuho',
     rows: [
       { label: '数量', value: '4' },
       { label: '金額', value: '123,456 円' },
@@ -35,6 +40,7 @@ const SUMMARY_ITEMS = [
   },
   {
     title: '授与品',
+    href: '/juyohin',
     rows: [
       { label: '金額(神符守札)', value: '123,456 円' },
       { label: '金額(社頭絵図)', value: '123,456 円' },
@@ -42,6 +48,7 @@ const SUMMARY_ITEMS = [
   },
   {
     title: '授印料',
+    href: '/juin',
     rows: [
       { label: '数量', value: '98' },
       { label: '金額', value: '123,456 円' },
@@ -49,32 +56,37 @@ const SUMMARY_ITEMS = [
   },
   {
     title: '賽銭',
+    href: '/saisen',
     rows: [{ label: '', value: '123,456 円' }],
   },
   {
     title: '御籤',
+    href: '/mikuji',
     rows: [{ label: '', value: '123,456 円' }],
   },
   {
     title: '拝観料',
+    href: '/houmotsuden',
     rows: [{ label: '', value: '123,456 円' }],
   },
   {
     title: '参拝施設所',
+    href: '/sanpai',
     rows: [{ label: '', value: '123,456 円' }],
   },
   {
     title: '欄外',
+    href: '/rangai',
     rows: [{ label: '', value: '123,456 円' }],
   },
 ];
 
 export default function DepositLedgerPage() {
-  const [date, setDate] = useState('2026/07/30');
+  const [date, setDate] = useState(DEFAULT_DATE);
   const [placeCode, setPlaceCode] = useState('010-010');
 
   return (
-    <div className="flex h-screen bg-[#FDFBF7] font-serif text-gray-800 overflow-hidden">
+    <div className="flex h-screen bg-[#FDFBF7] font-sans text-gray-800 overflow-hidden">
 
       {/* 1. 左側サイドバー（画面左に固定） */}
       <aside className="w-64 h-screen bg-[#008C9E] text-white flex flex-col shrink-0 shadow-lg sticky top-0">
@@ -96,11 +108,10 @@ export default function DepositLedgerPage() {
             <Link
               key={item.id}
               href={item.href}
-              className={`flex items-center gap-3 px-6 py-3 text-base transition-colors ${
-                item.active
-                  ? 'bg-[#55B3C1] font-bold text-white shadow-inner'
-                  : 'hover:bg-[#007b8b] text-teal-50'
-              }`}
+              className={`flex items-center gap-3 px-6 py-3 text-base transition-colors ${item.active
+                ? 'bg-[#55B3C1] font-bold text-white shadow-inner'
+                : 'hover:bg-[#007b8b] text-teal-50'
+                }`}
             >
               <span className="text-xl">{item.icon}</span>
               <span>{item.label}</span>
@@ -120,44 +131,21 @@ export default function DepositLedgerPage() {
             <div className="text-base font-medium text-slate-700">管理者</div>
           </div>
 
-          {/* 下段：検索・条件指定ボックス */}
-          <div className="bg-[#FFEAD0] p-4 2xl:p-5 rounded-xl shadow-md border border-[#FCD29F] flex flex-wrap items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-6">
+          {/* 下段：検索・条件指定ボックス（横並び配置） */}
+          <div className="bg-[#FFEAD0] p-4 2xl:p-5 rounded-xl shadow-md border border-[#FCD29F] flex flex-wrap items-center justify-between gap-4 text-sm 2xl:text-base">
+            <div className="flex flex-wrap items-center gap-y-3 gap-x-6">
               {/* 日付入力 */}
               <div className="flex items-center gap-2">
                 <span className="font-bold text-sm 2xl:text-base text-gray-700">日付</span>
-                <input
-                  type="text"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="bg-white border border-gray-400 rounded px-3 py-1 text-center w-36 shadow-inner font-sans tracking-wide focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
+                <DatePickerInput value={date} onChange={setDate} />
               </div>
 
               {/* 場所コード選択 */}
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-sm 2xl:text-base text-gray-700">場所コード</span>
-                <div className="relative">
-                  <select
-                    value={placeCode}
-                    onChange={(e) => setPlaceCode(e.target.value)}
-                    className="bg-white border border-gray-400 rounded px-3 py-1 pr-8 appearance-none shadow-inner font-sans focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  >
-                    <option value="010-010">010 - 010</option>
-                  </select>
-                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs pointer-events-none text-gray-600">▼</span>
-                </div>
-                <input
-                  type="text"
-                  readOnly
-                  value="祈祷所"
-                  className="bg-gray-200 border border-gray-400 rounded px-3 py-1 w-48 text-gray-700 shadow-inner"
-                />
-              </div>
+              <PlaceCodeSelector value={placeCode} onChange={setPlaceCode} />
             </div>
 
-            {/* 検索ボタン */}
-            <button className="bg-[#004EA2] hover:bg-[#003B7B] text-white px-10 py-2 rounded-md font-bold shadow transition active:translate-y-0.5">
+            {/* 検索ボタン（右側に横並び） */}
+            <button className="bg-[#004EA2] hover:bg-[#003B7B] text-white h-10 px-8 inline-flex items-center justify-center text-sm font-bold rounded-md shadow transition active:translate-y-0.5 shrink-0 border-0 leading-none">
               検索
             </button>
           </div>
@@ -182,7 +170,9 @@ export default function DepositLedgerPage() {
                             >
                               <div className="flex items-center gap-2">
                                 <span>{item.title}</span>
-                                <span className="text-xs text-gray-500 hover:text-blue-600 cursor-pointer">🔗</span>
+                                <Link href={item.href}>
+                                  <span className="text-xs text-gray-500 hover:text-blue-600 cursor-pointer">🔗</span>
+                                </Link>
                               </div>
                             </td>
                           )}
@@ -222,9 +212,7 @@ export default function DepositLedgerPage() {
 
           {/* 3. 右下アクションボタン */}
           <div className="flex justify-end mt-6">
-            <button className="bg-[#997A00] hover:bg-[#806600] text-white px-10 py-3 rounded-full font-bold shadow-md transition active:translate-y-0.5 text-base">
-              帳票出力
-            </button>
+            <button className="bg-[#997A00] hover:bg-[#806600] text-white px-10 py-2 rounded-md font-bold shadow transition active:translate-y-0.5 w-full sm:w-auto">帳票出力</button>
           </div>
         </main>
       </div>

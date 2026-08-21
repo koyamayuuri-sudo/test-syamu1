@@ -1,166 +1,111 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import { PlaceCodeSelector } from '../components/PlaceCodeSelector';
-import { DatePickerInput } from '../components/DatePickerInput';
-import { DEFAULT_DATE } from '../constants/date';
 import DashboardLayout from '../components/DashboardLayout';
+import { MENU_ITEMS } from '../constants/menu';
 
-// テーブルの表示データ
-const SUMMARY_ITEMS = [
+const NOTIFICATIONS = [
   {
-    title: '祈祷料',
-    href: '/kitou',
-    rows: [
-      { label: '数量', value: '23' },
-      { label: '金額', value: '123,456 円' },
-    ],
+    id: 1,
+    status: '未入力',
+    statusType: 'warning',
+    date: '令和8年9月21日',
+    message: '初穂実績登録 に未入力の項目があります',
+    isNew: true,
   },
   {
-    title: '初穂料',
-    href: '/hatsuho',
-    rows: [
-      { label: '数量', value: '4' },
-      { label: '金額', value: '123,456 円' },
-    ],
+    id: 2,
+    status: '完了済',
+    statusType: 'success',
+    date: '令和8年8月17日',
+    message: '授与品明細の登録 が完了しました',
+    isNew: false,
   },
   {
-    title: '授与品',
-    href: '/juyohin',
-    rows: [
-      { label: '金額(神符守札)', value: '123,456 円' },
-      { label: '金額(社頭絵図)', value: '123,456 円' },
-    ],
+    id: 3,
+    status: '完了済',
+    statusType: 'success',
+    date: '令和8年8月10日',
+    message: '拝観料の実績登録 が完了しました',
+    isNew: false,
   },
   {
-    title: '授印料',
-    href: '/juin',
-    rows: [
-      { label: '数量', value: '98' },
-      { label: '金額', value: '123,456 円' },
-    ],
-  },
-  {
-    title: '賽銭',
-    href: '/saisen',
-    rows: [{ label: '', value: '123,456 円' }],
-  },
-  {
-    title: '御籤',
-    href: '/mikuji',
-    rows: [{ label: '', value: '123,456 円' }],
-  },
-  {
-    title: '拝観料',
-    href: '/houmotsuden',
-    rows: [{ label: '', value: '123,456 円' }],
-  },
-  {
-    title: '参拝施設所',
-    href: '/sanpai',
-    rows: [{ label: '', value: '123,456 円' }],
-  },
-  {
-    title: '欄外',
-    href: '/rangai',
-    rows: [{ label: '', value: '123,456 円' }],
+    id: 4,
+    status: '未入力',
+    statusType: 'warning',
+    date: '令和8年8月1日',
+    message: '収益事業の売上金の登録 に未入力の項目があります',
+    isNew: false,
   },
 ];
 
-export default function DepositLedgerPage() {
-  const [date, setDate] = useState(DEFAULT_DATE);
-  const [placeCode, setPlaceCode] = useState('010-010');
-
-  const handleSearch = () => {
-    // 検索処理
-  };
-
-  const handlePrint = () => {
-    // 帳票出力処理
-  };
-
-  // 検索・条件指定ボックス（DashboardLayout の header 内に差し込まれる）
-  const inputForm = (
-    <div className="flex flex-wrap items-center justify-between gap-4">
-      <div className="flex flex-wrap items-center gap-y-3 gap-x-6">
-        {/* 日付入力 */}
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-sm 2xl:text-base text-gray-700">日付</span>
-          <DatePickerInput value={date} onChange={setDate} />
+export default function HomePage() {
+  return (
+    <DashboardLayout>
+      <div className="p-6 bg-[#FAF7F0] min-h-[calc(100vh-80px)] flex flex-col gap-8 w-full">
+        
+        {/* メニューグリッド（共通定数をループ描画） */}
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-4 w-full">
+          {MENU_ITEMS.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link key={item.id} href={item.href} className="w-full">
+                <div className="bg-white rounded-xl p-3 w-full aspect-square flex flex-col items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all border border-stone-100 cursor-pointer group">
+                  <div className="shrink-0">
+                    <Icon className={`w-8 h-8 sm:w-10 sm:h-10 ${item.color} transition-transform group-hover:scale-110`} />
+                  </div>
+                  <span className={`font-serif font-bold text-sm sm:text-base ${item.color} text-center line-clamp-1`}>
+                    {item.title}
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
 
-        {/* 場所コード選択 */}
-        <PlaceCodeSelector value={placeCode} onChange={setPlaceCode} />
-      </div>
+        {/* お知らせ・通知リスト */}
+        <div className="bg-white rounded-2xl p-6 shadow-md border border-stone-200/60 w-full">
+          <div className="max-h-[280px] overflow-y-auto pr-2 flex flex-col gap-3">
+            {NOTIFICATIONS.map((notice) => (
+              <div
+                key={notice.id}
+                className="flex items-center justify-between p-3 border-b border-stone-100 last:border-0 hover:bg-stone-50/50 rounded-lg transition w-full"
+              >
+                <div className="flex items-center gap-6 flex-1 min-w-0">
+                  {/* ステータスバッジ */}
+                  <span
+                    className={`px-4 py-1 rounded-full text-xs font-bold text-stone-800 shadow-sm shrink-0 ${
+                      notice.statusType === 'warning'
+                        ? 'bg-[#FFEB80]'
+                        : 'bg-[#10B981] text-white'
+                    }`}
+                  >
+                    {notice.status}
+                  </span>
 
-      {/* 検索ボタン */}
-      <button
-        onClick={handleSearch}
-        className="bg-[#004EA2] hover:bg-[#003B7B] text-white h-10 px-8 inline-flex items-center justify-center text-sm font-bold rounded-md shadow transition active:translate-y-0.5 shrink-0 border-0 leading-none"
-      >
-        検索
-      </button>
-    </div>
-  );
+                  {/* 日付 */}
+                  <span className="text-sm font-medium text-stone-700 min-w-[110px] shrink-0">
+                    {notice.date}
+                  </span>
 
-  return (
-    <DashboardLayout inputForm={inputForm} onPrint={handlePrint}>
-      {/* 集計テーブル領域 */}
-      <div className="bg-white border border-gray-400 shadow-sm rounded-sm">
-        <table className="w-full border-collapse text-left text-sm 2xl:text-base">
-          <tbody>
-            {SUMMARY_ITEMS.map((item, itemIdx) => (
-              <React.Fragment key={itemIdx}>
-                {item.rows.map((row, rowIdx) => (
-                  <tr key={rowIdx} className="border-b border-gray-300 hover:bg-slate-50">
-                    {/* 項目名 */}
-                    {rowIdx === 0 && (
-                      <td
-                        rowSpan={item.rows.length}
-                        className="w-[25%] border-r border-gray-300 bg-gray-100/50 p-3.5 2xl:p-4 font-bold align-middle text-gray-800"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span>{item.title}</span>
-                          <Link href={item.href}>
-                            <span className="text-xs text-gray-500 hover:text-blue-600 cursor-pointer">
-                              🔗
-                            </span>
-                          </Link>
-                        </div>
-                      </td>
-                    )}
+                  {/* メッセージ */}
+                  <span className="text-sm font-medium text-stone-800 truncate">
+                    {notice.message}
+                  </span>
+                </div>
 
-                    {/* サブ項目（数量/金額など） */}
-                    {row.label ? (
-                      <td className="w-[20%] border-r border-gray-300 p-3 2xl:p-3.5 text-center bg-gray-50/30 text-gray-700">
-                        {row.label}
-                      </td>
-                    ) : null}
-
-                    {/* 値 */}
-                    <td
-                      colSpan={row.label ? 1 : 2}
-                      className="p-3 2xl:p-3.5 text-right font-sans font-normal tabular-nums text-gray-900 pr-12 text-base 2xl:text-lg"
-                    >
-                      {row.value}
-                    </td>
-                  </tr>
-                ))}
-              </React.Fragment>
+                {/* NEWバッジ */}
+                {notice.isNew && (
+                  <span className="text-xs font-bold text-red-500 tracking-wider animate-pulse shrink-0 ml-4">
+                    NEW!
+                  </span>
+                )}
+              </div>
             ))}
+          </div>
+        </div>
 
-            {/* 合計金額行 */}
-            <tr className="bg-[#F8D0FF] font-bold border-t-2 border-gray-400">
-              <td colSpan={2} className="p-4 text-center border-r border-gray-400 text-gray-900">
-                合計金額
-              </td>
-              <td className="p-4 text-right pr-12 font-sans tabular-nums text-gray-900 text-lg 2xl:text-xl">
-                123,456,789 円
-              </td>
-            </tr>
-          </tbody>
-        </table>
       </div>
     </DashboardLayout>
   );

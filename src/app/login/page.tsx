@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { mockLogin } from '../../components/auth';
 
 export default function LoginPage() {
     const [id, setId] = useState('');
@@ -12,17 +13,30 @@ export default function LoginPage() {
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
 
-        // IDとパスワードの簡易認証（両方 "0000" の場合のみ許可）
-        if (id === '0000' && password === '0000') {
-            // ローカルストレージにユーザー情報を保存
-            localStorage.setItem('user_id', id);
+        // 1. 疑似ログイン関数を実行
+        const result = mockLogin(id, password);
+
+        // 2. 結果に応じた処理
+        if (result.success && result.user) {
+            // 成功時: ローカルストレージにユーザー情報（ID、権限、所属場所、トークン）を保存
+            localStorage.setItem('user_id', result.user.id);
+            localStorage.setItem('user_role', result.user.role);
+
+            // 所属場所（locationId）を保存（マスタなどで未設定の場合は空文字にするか削除）
+            if (result.user.locationId) {
+                localStorage.setItem('user_location', result.user.locationId);
+            } else {
+                localStorage.removeItem('user_location');
+            }
+
             localStorage.setItem('auth_token', 'dummy_token_' + Date.now());
 
             setError('');
             // ホーム画面へ遷移
             router.push('/');
         } else {
-            setError('IDまたはパスワードが正しくありません');
+            // 失敗時: mockLogin から返されたエラーメッセージを表示
+            setError(result.message || 'ログインに失敗しました');
         }
     };
 
@@ -45,7 +59,7 @@ export default function LoginPage() {
 
                 {/* フォーム */}
                 <form onSubmit={handleLogin} className="w-full max-w-xs flex flex-col gap-5">
-                    {/* ID入力欄 */}
+                    {/* ID 入力欄 */}
                     <div className="flex flex-col gap-1.5">
                         <label htmlFor="id" className="text-sm font-bold text-gray-800">
                             ID
@@ -55,6 +69,7 @@ export default function LoginPage() {
                             type="text"
                             value={id}
                             onChange={(e) => setId(e.target.value)}
+                            placeholder=""
                             className="w-full bg-[#f0ede9] border border-gray-400 rounded px-3 py-1.5 text-gray-800 focus:outline-none focus:ring-1 focus:ring-teal-600 transition"
                             required
                         />
@@ -70,6 +85,7 @@ export default function LoginPage() {
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            placeholder=""
                             className="w-full bg-[#f0ede9] border border-gray-400 rounded px-3 py-1.5 text-gray-800 focus:outline-none focus:ring-1 focus:ring-teal-600 transition"
                             required
                         />

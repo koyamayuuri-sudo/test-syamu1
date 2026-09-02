@@ -16,4 +16,3 @@ JavaScript／TypeScript
 ～バックエンド～
 【DB】
 ・ローカルストレージ
-※API接続の学習のために後々supabaseとDockerの導入を進める
